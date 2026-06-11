@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHOULD I START THIS BUSINESS? — Venture Command Centre</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{
+  color-scheme: dark;
+  --space:#04060d; --obsidian:#0a0e1a; --gunmetal:#141a2b; --gunmetal2:#1b2236;
+  --blue:#1f8fff; --violet:#9d4dff; --cyan:#00e5ff; --green:#27f0a5; --amber:#ffb547; --red:#ff4d6d;
+  --txt:#d7e3ff; --dim:#6d7ca3; --faint:#3a4564;
+  --glass:rgba(20,28,52,.55); --line:rgba(0,229,255,.14); --line2:rgba(157,77,255,.18);
+  --mono:ui-monospace,'SF Mono','Cascadia Code',Consolas,'Roboto Mono',monospace;
+  --sans:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--space);color:var(--txt);font-family:var(--sans);min-height:100%;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:90;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+#particles{position:fixed;inset:0;z-index:0}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 30%,transparent 40%,rgba(2,4,10,.75) 100%)}
+.gridfloor{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.25;
+  background-image:linear-gradient(rgba(31,143,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(31,143,255,.05) 1px,transparent 1px);
+  background-size:48px 48px}
+#app{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 20px 120px}
+
+/* ---------- typography ---------- */
+.k{font-family:var(--mono);letter-spacing:.18em;text-transform:uppercase}
+.h-glow{text-shadow:0 0 18px rgba(0,229,255,.45),0 0 60px rgba(31,143,255,.25)}
+.dim{color:var(--dim)} .cyan{color:var(--cyan)} .violet{color:#c08bff} .grn{color:var(--green)} .amb{color:var(--amber)} .red{color:var(--red)}
+
+/* ---------- panels ---------- */
+.panel{position:relative;background:var(--glass);border:1px solid var(--line);border-radius:12px;
+  backdrop-filter:blur(14px);box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 18px 50px rgba(0,0,0,.5);
+  overflow:hidden}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,229,255,.6),transparent)}
+.corner{position:absolute;width:14px;height:14px;border-color:var(--cyan);opacity:.55}
+.corner.tl{top:6px;left:6px;border-top:1.5px solid;border-left:1.5px solid}
+.corner.tr{top:6px;right:6px;border-top:1.5px solid;border-right:1.5px solid}
+.corner.bl{bottom:6px;left:6px;border-bottom:1.5px solid;border-left:1.5px solid}
+.corner.br{bottom:6px;right:6px;border-bottom:1.5px solid;border-right:1.5px solid}
+.p-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.p-head .tag{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--cyan);
+  border:1px solid rgba(0,229,255,.3);padding:3px 8px;border-radius:3px;background:rgba(0,229,255,.06)}
+.p-head h2{font-size:14px;letter-spacing:.24em;font-weight:600;text-transform:uppercase}
+.p-body{padding:18px}
+
+/* ---------- header ---------- */
+header{display:flex;justify-content:space-between;align-items:center;padding:22px 4px 14px;
+  border-bottom:1px solid var(--line);margin-bottom:26px;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:14px}
+.logo .mark{width:38px;height:38px;border:1.5px solid var(--cyan);border-radius:8px;position:relative;
+  display:grid;place-items:center;box-shadow:0 0 18px rgba(0,229,255,.35),inset 0 0 12px rgba(0,229,255,.15)}
+.logo .mark::after{content:'';width:14px;height:14px;background:linear-gradient(135deg,var(--cyan),var(--violet));
+  clip-path:polygon(50% 0,100% 100%,0 100%);animation:pulse 2.4s ease-in-out infinite}
+.logo h1{font-size:15px;letter-spacing:.3em;font-weight:700}
+.logo small{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.3em;color:var(--dim);margin-top:3px}
+.statusbar{display:flex;gap:18px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--dim);align-items:center}
+.led{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.led.g{background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite}
+.led.c{background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:blink 3.1s infinite}
+.led.v{background:var(--violet);box-shadow:0 0 8px var(--violet);animation:blink 2.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.82);opacity:.7}}
+
+/* ---------- boot ---------- */
+#boot{position:fixed;inset:0;z-index:100;background:var(--space);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;transition:opacity .9s ease}
+#boot.done{opacity:0;pointer-events:none}
+.boot-title{font-family:var(--mono);font-size:clamp(16px,3.4vw,30px);letter-spacing:.42em;color:var(--cyan);
+  text-shadow:0 0 24px rgba(0,229,255,.6);margin-bottom:8px;text-align:center}
+.boot-sub{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--dim);margin-bottom:42px}
+.boot-sys{width:min(520px,86vw);display:flex;flex-direction:column;gap:12px}
+.sysrow{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  color:var(--faint);opacity:0;transform:translateX(-12px);transition:all .4s ease}
+.sysrow.on{opacity:1;transform:none;color:var(--txt)}
+.sysrow .bar{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.sysrow .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan));
+  box-shadow:0 0 10px var(--cyan);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.sysrow .st{width:74px;text-align:right;color:var(--faint)}
+.sysrow.ok .st{color:var(--green);text-shadow:0 0 8px rgba(39,240,165,.5)}
+.boot-line{margin-top:38px;font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--dim);height:14px}
+.caret::after{content:'▊';animation:blink 1s infinite;color:var(--cyan)}
+
+/* ---------- input console ---------- */
+.console-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.fld{position:relative}
+.fld label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;color:var(--cyan);
+  text-transform:uppercase;margin-bottom:7px;opacity:.85}
+.fld input,.fld select,.fld textarea{width:100%;background:rgba(4,8,18,.7);border:1px solid rgba(109,124,163,.3);
+  border-radius:6px;color:var(--txt);font-family:var(--mono);font-size:13px;padding:10px 12px;outline:none;
+  transition:border-color .2s,box-shadow .2s}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(0,229,255,.35),0 0 18px rgba(0,229,255,.12)}
+.fld textarea{resize:vertical;min-height:72px;line-height:1.5}
+.fld select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--cyan) 50%),linear-gradient(135deg,var(--cyan) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+.c12{grid-column:span 12}.c6{grid-column:span 6}.c4{grid-column:span 4}.c3{grid-column:span 3}
+@media(max-width:760px){.c6,.c4,.c3{grid-column:span 12}}
+.skill{display:flex;align-items:center;gap:12px}
+.skill input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;
+  background:linear-gradient(90deg,var(--violet),var(--cyan));outline:none;padding:0;border:none}
+.skill input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+  background:var(--space);border:2px solid var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.7);cursor:pointer}
+.skill .val{font-family:var(--mono);font-size:13px;color:var(--cyan);width:34px;text-align:right}
+.launch{margin-top:22px;display:flex;justify-content:center}
+.btn-launch{position:relative;font-family:var(--mono);font-size:13px;letter-spacing:.34em;color:var(--space);
+  background:linear-gradient(90deg,var(--cyan),var(--blue) 55%,var(--violet));border:none;border-radius:6px;
+  padding:16px 46px 16px 52px;cursor:pointer;font-weight:700;text-transform:uppercase;
+  box-shadow:0 0 28px rgba(0,229,255,.4),0 0 70px rgba(157,77,255,.25);transition:transform .15s,box-shadow .2s}
+.btn-launch:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(0,229,255,.6),0 0 90px rgba(157,77,255,.4)}
+.btn-launch:active{transform:translateY(0)}
+.btn-ghost{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--cyan);background:transparent;
+  border:1px solid rgba(0,229,255,.35);border-radius:5px;padding:9px 18px;cursor:pointer;text-transform:uppercase;
+  transition:all .2s}
+.btn-ghost:hover{background:rgba(0,229,255,.08);box-shadow:0 0 14px rgba(0,229,255,.25)}
+
+/* ---------- analysis cinematic ---------- */
+#cine{position:fixed;inset:0;z-index:95;background:rgba(3,5,12,.92);backdrop-filter:blur(6px);
+  display:none;flex-direction:column;align-items:center;justify-content:center}
+#cine.show{display:flex}
+.hex{width:120px;height:120px;position:relative;margin-bottom:34px}
+.hex .ring{position:absolute;inset:0;border:1.5px solid transparent;border-radius:50%}
+.hex .r1{border-top-color:var(--cyan);border-right-color:var(--cyan);animation:spin 1.4s linear infinite}
+.hex .r2{inset:14px;border-bottom-color:var(--violet);border-left-color:var(--violet);animation:spin 2.1s linear infinite reverse}
+.hex .r3{inset:30px;border-top-color:var(--blue);animation:spin .9s linear infinite}
+.hex .core{position:absolute;inset:46px;background:radial-gradient(circle,var(--cyan),transparent 70%);
+  border-radius:50%;animation:pulse 1.2s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#cinelog{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--cyan);height:18px;text-align:center}
+#cinepct{font-family:var(--mono);font-size:30px;letter-spacing:.2em;color:var(--txt);margin-top:16px;text-shadow:0 0 20px rgba(0,229,255,.5)}
+
+/* ---------- sections ---------- */
+section{margin-bottom:30px;opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+section.reveal{opacity:1;transform:none}
+#results{display:none}
+
+/* ---------- gauges ---------- */
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px}
+.gauge{position:relative;background:rgba(8,12,26,.6);border:1px solid rgba(109,124,163,.18);border-radius:10px;
+  padding:18px 10px 14px;text-align:center;transition:border-color .3s}
+.gauge:hover{border-color:rgba(0,229,255,.45)}
+.gauge svg{display:block;margin:0 auto}
+.gauge .num{position:absolute;top:64px;left:0;right:0;font-family:var(--mono);font-size:24px;font-weight:700;
+  text-shadow:0 0 14px currentColor}
+.gauge .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-top:10px;line-height:1.6}
+.gauge .delta{font-family:var(--mono);font-size:10px;margin-top:4px;height:13px}
+.gring-bg{fill:none;stroke:rgba(109,124,163,.18);stroke-width:7}
+.gring{fill:none;stroke-width:7;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;
+  filter:drop-shadow(0 0 6px currentColor);transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+
+/* ---------- committee ---------- */
+.committee{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.analyst{background:rgba(8,12,26,.65);border:1px solid rgba(109,124,163,.2);border-radius:10px;padding:16px;
+  position:relative;overflow:hidden;transition:border-color .3s,transform .2s}
+.analyst:hover{border-color:rgba(157,77,255,.5);transform:translateY(-2px)}
+.analyst .ahead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);
+  font-size:15px;font-weight:700;position:relative;flex-shrink:0}
+.avatar::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px dashed currentColor;
+  opacity:.5;animation:spin 10s linear infinite}
+.analyst .name{font-size:12px;letter-spacing:.18em;font-weight:700;text-transform:uppercase}
+.analyst .role{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--dim);margin-top:2px}
+.analyst .conf{margin-left:auto;text-align:right}
+.analyst .conf b{font-family:var(--mono);font-size:17px}
+.analyst .conf span{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.16em;color:var(--dim)}
+.analyst .txt{font-size:12.5px;line-height:1.7;color:#b9c6e8;min-height:96px}
+.analyst .vote{margin-top:12px;display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.22em;
+  padding:4px 10px;border-radius:3px;border:1px solid currentColor}
+.typing::after{content:'▊';animation:blink .8s infinite}
+.intel-badge{font-family:var(--mono);font-size:8px;letter-spacing:.2em;padding:2px 7px;border-radius:3px;margin-left:auto}
+.intel-badge.live{color:var(--green);border:1px solid rgba(39,240,165,.4);background:rgba(39,240,165,.07)}
+.intel-badge.core{color:var(--amber);border:1px solid rgba(255,181,71,.4);background:rgba(255,181,71,.07)}
+
+/* ---------- radar ---------- */
+.radar-wrap{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:center}
+@media(max-width:820px){.radar-wrap{grid-template-columns:1fr}}
+.radar-box{position:relative;height:340px}
+.sweep{position:absolute;inset:8%;border-radius:50%;pointer-events:none;overflow:hidden;
+  background:conic-gradient(from 0deg,rgba(0,229,255,.22),transparent 18%);animation:spin 4.5s linear infinite;
+  mask:radial-gradient(circle,black 65%,transparent 72%)}
+.threat-list{display:flex;flex-direction:column;gap:10px}
+.threat{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em}
+.threat .tl{width:200px;color:var(--dim);text-transform:uppercase}
+.threat .tb{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.threat .tb i{display:block;height:100%;width:0;border-radius:3px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.threat .tv{width:54px;text-align:right;font-weight:700}
+
+/* ---------- what-if ---------- */
+.wif-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.wif{background:rgba(8,12,26,.6);border:1px solid rgba(109,124,163,.2);border-radius:9px;padding:14px}
+.wif h4{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--violet);text-transform:uppercase;margin-bottom:10px}
+.wif h4{color:#c08bff}
+.toggle-row{display:flex;gap:8px;flex-wrap:wrap}
+.tg{font-family:var(--mono);font-size:10px;letter-spacing:.14em;padding:7px 12px;border-radius:4px;cursor:pointer;
+  border:1px solid rgba(109,124,163,.35);color:var(--dim);background:transparent;transition:all .2s;text-transform:uppercase}
+.tg.on{color:var(--space);background:linear-gradient(90deg,var(--cyan),var(--violet));border-color:transparent;
+  box-shadow:0 0 14px rgba(0,229,255,.35);font-weight:700}
+.wif .skill .val{width:58px}
+.sim-note{margin-top:14px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--dim)}
+.sim-note b{color:var(--cyan)}
+
+/* ---------- probability ---------- */
+.prob-row{margin-bottom:22px}
+.prob-row .pl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;
+  letter-spacing:.18em;margin-bottom:8px}
+.prob-row .pl b{font-size:15px;text-shadow:0 0 12px currentColor}
+.ptrack{height:14px;background:rgba(255,255,255,.05);border:1px solid rgba(109,124,163,.2);border-radius:7px;
+  overflow:hidden;position:relative}
+.pfill{height:100%;width:0;border-radius:7px;position:relative;transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.pfill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+  animation:sheen 2.4s linear infinite}
+@keyframes sheen{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* ---------- red team ---------- */
+.red-head{font-family:var(--mono);font-size:12px;letter-spacing:.26em;color:var(--red);margin-bottom:16px;
+  text-shadow:0 0 14px rgba(255,77,109,.5)}
+.redlist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:760px){.redlist{grid-template-columns:1fr}}
+.redcard{border:1px solid rgba(255,77,109,.28);background:rgba(255,77,109,.05);border-radius:8px;padding:14px;
+  display:flex;gap:12px;align-items:flex-start}
+.redcard .ico{font-family:var(--mono);color:var(--red);font-size:13px;flex-shrink:0;margin-top:1px}
+.redcard .rt{font-size:12px;line-height:1.65;color:#e7c9d2}
+.redcard .rt b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--red);
+  text-transform:uppercase;margin-bottom:5px}
+
+/* ---------- alternatives ---------- */
+.alt{display:grid;grid-template-columns:34px 1.5fr repeat(4,1fr) 1.2fr;gap:10px;align-items:center;
+  padding:13px 14px;border-bottom:1px solid rgba(109,124,163,.12);font-size:12px;transition:background .2s}
+.alt:hover{background:rgba(0,229,255,.04)}
+.alt.hdr{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;border-bottom:1px solid var(--line)}
+.alt .rank{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--cyan)}
+.alt .aname{font-weight:600;letter-spacing:.04em}
+.alt .aname small{display:block;color:var(--dim);font-size:10px;margin-top:2px;font-weight:400}
+.minibar{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:5px}
+.minibar i{display:block;height:100%;border-radius:3px}
+.alt .mv{font-family:var(--mono);font-size:10.5px;color:#b9c6e8}
+@media(max-width:860px){.alt{grid-template-columns:28px 1.3fr 1fr 1fr}.alt .hide-m{display:none}}
+
+/* ---------- roadmap ---------- */
+.timeline{position:relative;padding-left:34px}
+.timeline::before{content:'';position:absolute;left:10px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(180deg,var(--cyan),var(--violet));box-shadow:0 0 10px rgba(0,229,255,.4)}
+.tstep{position:relative;margin-bottom:22px}
+.tstep::before{content:'';position:absolute;left:-30px;top:4px;width:12px;height:12px;border-radius:50%;
+  background:var(--space);border:2px solid var(--cyan);box-shadow:0 0 12px rgba(0,229,255,.6)}
+.tstep h4{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--cyan);margin-bottom:7px}
+.tstep ul{list-style:none}
+.tstep li{font-size:12.5px;line-height:1.8;color:#b9c6e8;padding-left:16px;position:relative}
+.tstep li::before{content:'▸';position:absolute;left:0;color:var(--violet)}
+
+/* ---------- verdict ---------- */
+#verdictOverlay{position:fixed;inset:0;z-index:98;background:rgba(2,4,10,.94);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+#verdictOverlay.show{display:flex}
+.stamp{font-family:var(--mono);font-size:clamp(30px,7vw,68px);letter-spacing:.3em;font-weight:800;
+  padding:22px 48px;border:4px solid currentColor;border-radius:10px;transform:rotate(-6deg) scale(3);
+  opacity:0;text-align:center}
+.stamp.land{animation:stampIn .55s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes stampIn{0%{transform:rotate(-6deg) scale(3);opacity:0}60%{transform:rotate(-6deg) scale(.94);opacity:1}100%{transform:rotate(-6deg) scale(1);opacity:1}}
+.v-sub{margin-top:42px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--dim);text-align:center;max-width:640px;line-height:2}
+.v-votes{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+.v-vote{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;padding:7px 13px;border-radius:4px;border:1px solid currentColor}
+.v-close{margin-top:44px}
+.verdict-inline{display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+.v-badge{font-family:var(--mono);font-size:22px;letter-spacing:.26em;font-weight:800;padding:14px 28px;
+  border:2px solid currentColor;border-radius:8px;text-shadow:0 0 16px currentColor}
+.v-text{flex:1;min-width:260px;font-size:13px;line-height:1.8;color:#b9c6e8}
+.composite-ring{text-align:center}
+.composite-ring .cnum{font-family:var(--mono);font-size:26px;font-weight:800}
+.composite-ring .clbl{font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:var(--dim)}
+footer{margin-top:50px;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.24em;color:var(--faint);line-height:2}
+.ticker{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  margin:0 0 26px;padding:8px 0;white-space:nowrap}
+.ticker span{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--dim);
+  animation:tick 36s linear infinite;padding-left:100%}
+@keyframes tick{to{transform:translateX(-100%)}}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="gridfloor"></div>
+<div class="vignette"></div>
+
+<!-- BOOT -->
+<div id="boot">
+  <div class="boot-title h-glow">BUSINESS ANALYSIS SYSTEM ONLINE</div>
+  <div class="boot-sub">VENTURE COMMAND CENTRE · v4.2.1 · CLASSIFIED</div>
+  <div class="boot-sys" id="bootSys"></div>
+  <div class="boot-line caret" id="bootLine"></div>
+</div>
+
+<!-- ANALYSIS CINEMATIC -->
+<div id="cine">
+  <div class="hex"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="core"></div></div>
+  <div id="cinelog">INITIALISING…</div>
+  <div id="cinepct">0%</div>
+</div>
+
+<!-- VERDICT OVERLAY -->
+<div id="verdictOverlay">
+  <div class="stamp" id="stampEl">—</div>
+  <div class="v-sub" id="stampSub"></div>
+  <div class="v-votes" id="stampVotes"></div>
+  <div class="v-close"><button class="btn-ghost" onclick="document.getElementById('verdictOverlay').classList.remove('show')">RETURN TO COMMAND CENTRE</button></div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="logo">
+      <div class="mark"></div>
+      <div><h1 class="h-glow">SHOULD I START THIS BUSINESS?</h1><small>AI INVESTMENT COMMITTEE · LIVE EVALUATION DECK</small></div>
+    </div>
+    <div class="statusbar">
+      <span><i class="led g"></i>SYSTEMS NOMINAL</span>
+      <span><i class="led c"></i>5 ANALYSTS ACTIVE</span>
+      <span><i class="led v"></i><span id="clock">--:--:--</span> UTC</span>
+    </div>
+  </header>
+
+  <div class="ticker"><span id="tickerTxt">AWAITING MISSION PARAMETERS · MARKET INTELLIGENCE ENGINE STANDING BY · FINANCIAL ENGINE STANDING BY · COMPETITION SCANNER STANDING BY · FOUNDER ASSESSMENT ENGINE STANDING BY · RISK ANALYSIS ENGINE STANDING BY ·&nbsp;</span></div>
+
+  <!-- INPUT CONSOLE -->
+  <section id="inputSec" class="panel reveal">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <div class="p-head"><span class="tag">SEC-01</span><h2>Idea Input Centre</h2>
+      <span class="intel-badge core" style="margin-left:auto">MISSION PARAMETERS</span></div>
+    <div class="p-body">
+      <div class="console-grid">
+        <div class="fld c12"><label>Business Idea — describe the opportunity</label>
+          <textarea id="f_idea" placeholder="e.g. A subscription service delivering pre-portioned ingredients for high-protein meals to busy professionals in London…"></textarea></div>
+        <div class="fld c4"><label>Industry Archetype</label>
+          <select id="f_industry">
+            <option value="saas">SaaS / Software</option>
+            <option value="ecommerce">E-commerce / DTC</option>
+            <option value="agency">Agency / Services</option>
+            <option value="consulting">Consulting / Coaching</option>
+            <option value="content">Content / Media / Creator</option>
+            <option value="marketplace">Marketplace / Platform</option>
+            <option value="app">Mobile App</option>
+            <option value="local">Local / Bricks &amp; Mortar</option>
+            <option value="fintech">Fintech / Regulated</option>
+            <option value="other">Other / Hybrid</option>
+          </select></div>
+        <div class="fld c4"><label>Country / Primary Market</label><input id="f_country" value="United Kingdom"></div>
+        <div class="fld c4"><label>Target Customer</label>
+          <select id="f_cust"><option value="b2c">Consumers (B2C)</option><option value="b2b">Small Business (B2B)</option><option value="ent">Enterprise</option></select></div>
+        <div class="fld c3"><label>Startup Capital (£)</label><input id="f_capital" type="number" min="0" value="5000"></div>
+        <div class="fld c3"><label>Monthly Budget (£)</label><input id="f_monthly" type="number" min="0" value="500"></div>
+        <div class="fld c3"><label>Available Hours / Week</label><input id="f_hours" type="number" min="1" max="100" value="20"></div>
+        <div class="fld c3"><label>Experience Level</label>
+          <select id="f_exp"><option value="1">First-time founder</option><option value="3">Some side projects</option><option value="5" selected>Built a business before</option><option value="8">Multiple businesses</option><option value="10">Exited founder</option></select></div>
+        <div class="fld c4"><label>Sales Skills</label><div class="skill"><input type="range" id="f_sales" min="1" max="10" value="5"><span class="val" id="v_sales">5</span></div></div>
+        <div class="fld c4"><label>Technical Skills</label><div class="skill"><input type="range" id="f_tech" min="1" max="10" value="5"><span class="val" id="v_tech">5</span></div></div>
+        <div class="fld c4"><label>Marketing Skills</label><div class="skill"><input type="range" id="f_mkt" min="1" max="10" value="5"><span class="val" id="v_mkt">5</span></div></div>
+        <div class="fld c4"><label>Existing Audience (followers / list)</label><input id="f_aud" type="number" min="0" value="0"></div>
+        <div class="fld c4"><label>Revenue Goal (£ / month)</label><input id="f_goal" type="number" min="0" value="10000"></div>
+        <div class="fld c4"><label>Timeline Goal (months)</label><input id="f_timeline" type="number" min="1" max="60" value="12"></div>
+      </div>
+      <div class="launch"><button class="btn-launch" id="btnRun">◢ INITIATE COMMITTEE ANALYSIS</button></div>
+    </div>
+  </section>
+
+  <div id="results">
+
+    <!-- OPPORTUNITY SCAN -->
+    <section class="panel" id="scanSec">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-head"><span class="tag">SEC-02</span><h2>Opportunity Scan</h2>
+        <span class="intel-badge core" style="margin-left:auto" id="scanBadge">QUANT CORE</span></div>
+      <div class="p-body"><div class="gauges" id="gauges"></div></div>
+    </section>
+
+    <!-- COMMITTEE -->
+    <section class="panel" id="commSec">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-head"><span class="tag">SEC-03</span><h2>AI Investment Committee</h2>
+        <span class="intel-badge core" id="commBadge">HEURISTIC CORE</span></div>
+      <div class="p-body"><div class="committee" id="committee"></div></div>
+    </section>
+
+    <!-- RADAR -->
+    <section class="panel" id="radarSec">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-head"><span class="tag">SEC-04</span><h2>Competition Radar</h2>
+        <span class="intel-badge core" style="margin-left:auto">THREAT ASSESSMENT</span></div>
+      <div class="p-body">
+        <div class="radar-wrap">
+          <div class="radar-box"><canvas id="radarChart"></canvas><div class="sweep"></div></div>
+          <div class="threat-list" id="threatList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT-IF LAB -->
+    <section class="panel" id="wifSec">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-head"><span class="tag">SEC-05</span><h2>What-If Simulation Lab</h2>
+        <span class="intel-badge live" style="margin-left:auto">LIVE RECOMPUTE</span></div>
+      <div class="p-body">
+        <div class="wif-grid">
+          <div class="wif"><h4>Capital Injection</h4>
+            <div class="skill"><input type="range" id="w_cap" min="25" max="400" value="100" step="25"><span class="val" id="wv_cap">100%</span></div>
+            <div class="sim-note">Simulated capital: <b id="wn_cap">£5,000</b></div></div>
+          <div class="wif"><h4>Pricing Strategy</h4>
+            <div class="skill"><input type="range" id="w_price" min="-30" max="50" value="0" step="5"><span class="val" id="wv_price">0%</span></div>
+            <div class="sim-note">Price positioning vs. market baseline</div></div>
+          <div class="wif"><h4>Operating Model</h4>
+            <div class="toggle-row">
+              <button class="tg" id="w_hire">HIRE STAFF</button>
+              <button class="tg" id="w_out">OUTSOURCE</button>
+            </div>
+            <div class="sim-note">Staff raises capacity, burns cash. Outsourcing trades margin for speed.</div></div>
+          <div class="wif"><h4>Market Expansion</h4>
+            <div class="toggle-row">
+              <button class="tg" id="w_newmkt">NEW MARKETS</button>
+              <button class="tg on" data-ct="b2c" id="w_ctb2c">B2C</button>
+              <button class="tg" data-ct="b2b" id="w_ctb2b">B2B</button>
+              <button class="tg" data-ct="ent" id="w_ctent">ENTERPRISE</button>
+            </div>
+            <div class="sim-note">Switch customer type or open adjacent territories.</div></div>
+        </div>
+        <div class="sim-note" style="margin-top:18px">▲ ALL GAUGES, RADAR, PROBABILITIES AND VERDICT RECOMPUTE IN REAL TIME. <span id="wifDelta" class="cyan"></span></div>
+      </div>
+    </section>
+
+    <!-- PROBABILITY -->
+    <section class="panel" id="probSec">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-head"><span class="tag">SEC-06</span><h2>Success Probability Engine</h2>
+        <span class="intel-badge core" style="margin-left:auto">MONTE-CARLO CLASS</span></div>
+      <div class="p-body" id="probBody"></div>
+    </section>
+
+    <!-- RED TEAM -->
+    <section class="panel" id="redSec" style="border-color:rgba(255,77,109,.3)">
+      <div class="corner tl" style="border-color:var(--red)"></div><div class="corner tr" style="border-color:var(--red)"></div>
+      <div class="corner bl" style="border-color:var(--red)"></div><div class="corner br" style="border-color:var(--red)"></div>
+      <div class="p-head" style="border-color:rgba(255,77,109,.25)"><span class="tag" style="color:var(--red);border-color:rgba(255,77,109,.4);background:rgba(255,77,109,.06)">SEC-07</span>
+        <h2 style="color:#ff8da1">AI Red Team — Adversarial Analysis</h2>
+        <span class="intel-badge core" id="redBadge" style="margin-left:auto;color:var(--red);border-color:rgba(255,77,109,.4)">ATTACK MODE</span></div>
+      <div class="p-body">
+        <div class="red-head">❝ IF THIS BUSINESS FAILS, WHY WILL IT FAIL? ❞</div>
+        <div class="redlist" id="redList"></div>
+      </div>
+    </section>
+
+    <!-- ALTERNATIVES -->
+    <section class="panel" id="altSec">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-head"><span class="tag">SEC-08</span><h2>Alternative Opportunities</h2>
+        <span class="intel-badge core" style="margin-left:auto">RANKED BY FOUNDER FIT</span></div>
+      <div class="p-body" style="padding:0 0 6px">
+        <div class="alt hdr"><div></div><div>OPPORTUNITY</div><div>STARTUP COST</div><div class="hide-m">DIFFICULTY</div><div class="hide-m">SCALABILITY</div><div>FIRST SALE</div><div class="hide-m">LONG-TERM POTENTIAL</div></div>
+        <div id="altList"></div>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="panel" id="roadSec">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-head"><span class="tag">SEC-09</span><h2>Mission Roadmap</h2>
+        <span class="intel-badge core" style="margin-left:auto" id="roadBadge">STRATEGIC TIMELINE</span></div>
+      <div class="p-body"><div class="timeline" id="roadmap"></div></div>
+    </section>
+
+    <!-- FINAL DECISION -->
+    <section class="panel" id="verdSec">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-head"><span class="tag">SEC-10</span><h2>Final Decision</h2>
+        <span class="intel-badge live" style="margin-left:auto">COMMITTEE CONSENSUS</span></div>
+      <div class="p-body">
+        <div class="verdict-inline">
+          <div class="composite-ring">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle class="gring-bg" cx="55" cy="55" r="47"></circle>
+              <circle class="gring" id="compRing" cx="55" cy="55" r="47" stroke="#00e5ff" stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
+            </svg>
+            <div class="cnum" id="compNum" style="margin-top:-76px">0</div>
+            <div class="clbl" style="margin-top:34px">COMPOSITE</div>
+          </div>
+          <div class="v-badge" id="vBadge">—</div>
+          <div class="v-text" id="vText"></div>
+        </div>
+        <div class="launch" style="margin-top:24px">
+          <button class="btn-launch" id="btnVerdict">◢ RENDER FINAL VERDICT</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>VENTURE COMMAND CENTRE · DECISION-SUPPORT SIMULATION · NOT FINANCIAL ADVICE<br>
+  SCORES ARE MODEL ESTIMATES FOR EXPLORATION — VALIDATE WITH REAL CUSTOMERS BEFORE COMMITTING CAPITAL</footer>
+</div>
+
+<script>
+/* ============================================================
+   VENTURE COMMAND CENTRE — core systems
+============================================================ */
+'use strict';
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmtGBP=v=>'£'+Math.round(v).toLocaleString('en-GB');
+
+/* ---------- particles ---------- */
+(function(){
+  const cv=$('particles'),ctx=cv.getContext('2d');let W,H,P=[];
+  function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+  addEventListener('resize',rs);rs();
+  for(let i=0;i<70;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.6+.4,c:Math.random()<.5?'0,229,255':'157,77,255'});
+  (function loop(){
+    ctx.clearRect(0,0,W,H);
+    for(const p of P){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle=`rgba(${p.c},.55)`;ctx.fill();
+    }
+    for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){
+      const a=P[i],b=P[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;
+      if(d<10000){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(31,143,255,${.10*(1-d/10000)})`;ctx.stroke();}
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ---------- clock ---------- */
+setInterval(()=>{$('clock').textContent=new Date().toISOString().substr(11,8)},1000);
+
+/* ---------- boot sequence ---------- */
+const ENGINES=['MARKET INTELLIGENCE ENGINE','FINANCIAL ENGINE','COMPETITION SCANNER','FOUNDER ASSESSMENT ENGINE','RISK ANALYSIS ENGINE'];
+(function boot(){
+  const box=$('bootSys');
+  ENGINES.forEach(n=>{
+    const r=document.createElement('div');r.className='sysrow';
+    r.innerHTML=`<span style="width:230px">${n}</span><div class="bar"><i></i></div><span class="st">OFFLINE</span>`;
+    box.appendChild(r);
+  });
+  const rows=[...box.children];
+  rows.forEach((r,i)=>{
+    setTimeout(()=>{r.classList.add('on');r.querySelector('i').style.width='100%';
+      setTimeout(()=>{r.classList.add('ok');r.querySelector('.st').textContent='ONLINE'},850);
+    },380+i*430);
+  });
+  const lines=['CALIBRATING NEURAL CORES…','SYNCING GLOBAL MARKET FEEDS…','COMMITTEE ASSEMBLED. AWAITING MISSION PARAMETERS.'];
+  lines.forEach((l,i)=>setTimeout(()=>{$('bootLine').textContent=l},900+i*1100));
+  setTimeout(()=>$('boot').classList.add('done'),380+ENGINES.length*430+1700);
+})();
+
+/* ---------- industry archetypes ---------- */
+const ARCH={
+  saas:       {label:'SaaS / Software',        scal:92,comp:78,capNeed:12000,speed:32,def:72,margin:80,w:{tech:.5, sales:.25,mkt:.25}},
+  ecommerce:  {label:'E-commerce / DTC',       scal:68,comp:88,capNeed:9000, speed:55,def:32,margin:38,w:{tech:.15,sales:.25,mkt:.6}},
+  agency:     {label:'Agency / Services',      scal:42,comp:72,capNeed:1500, speed:88,def:40,margin:55,w:{tech:.2, sales:.5, mkt:.3}},
+  consulting: {label:'Consulting / Coaching',  scal:34,comp:62,capNeed:800,  speed:90,def:52,margin:75,w:{tech:.15,sales:.55,mkt:.3}},
+  content:    {label:'Content / Media',        scal:84,comp:82,capNeed:1200, speed:25,def:48,margin:78,w:{tech:.1, sales:.2, mkt:.7}},
+  marketplace:{label:'Marketplace / Platform', scal:95,comp:80,capNeed:45000,speed:18,def:82,margin:60,w:{tech:.45,sales:.25,mkt:.3}},
+  app:        {label:'Mobile App',             scal:90,comp:86,capNeed:20000,speed:24,def:55,margin:72,w:{tech:.55,sales:.1, mkt:.35}},
+  local:      {label:'Local / Bricks & Mortar',scal:26,comp:58,capNeed:25000,speed:60,def:58,margin:30,w:{tech:.05,sales:.45,mkt:.5}},
+  fintech:    {label:'Fintech / Regulated',    scal:88,comp:74,capNeed:60000,speed:12,def:85,margin:70,w:{tech:.5, sales:.3, mkt:.2}},
+  other:      {label:'Hybrid Venture',         scal:60,comp:70,capNeed:8000, speed:50,def:50,margin:55,w:{tech:.33,sales:.34,mkt:.33}},
+};
+
+/* ---------- state ---------- */
+let INP=null;                 // captured inputs
+let MOD={capMult:1,price:0,hire:false,out:false,newMkt:false,ct:null}; // what-if mods
+let SCORES=null;
+let radarChart=null;
+let AI=null;                  // askClaude enrichment
+
+/* ---------- input capture & persistence ---------- */
+const FIELDS=['f_idea','f_industry','f_country','f_cust','f_capital','f_monthly','f_hours','f_exp','f_sales','f_tech','f_mkt','f_aud','f_goal','f_timeline'];
+function saveInputs(){const o={};FIELDS.forEach(f=>o[f]=$(f).value);try{localStorage.setItem('vcc_inputs',JSON.stringify(o))}catch(e){}}
+(function restore(){
+  try{const o=JSON.parse(localStorage.getItem('vcc_inputs')||'null');
+    if(o)FIELDS.forEach(f=>{if(o[f]!==undefined)$(f).value=o[f]})}catch(e){}
+  ['sales','tech','mkt'].forEach(k=>{$('v_'+k).textContent=$('f_'+k).value;
+    $('f_'+k).addEventListener('input',()=>$('v_'+k).textContent=$('f_'+k).value)});
+})();
+function gather(){
+  return {
+    idea:$('f_idea').value.trim()||'Unnamed venture',
+    industry:$('f_industry').value, country:$('f_country').value.trim()||'United Kingdom',
+    cust:$('f_cust').value,
+    capital:+$('f_capital').value||0, monthly:+$('f_monthly').value||0,
+    hours:clamp(+$('f_hours').value||10,1,100), exp:+$('f_exp').value||1,
+    sales:+$('f_sales').value, tech:+$('f_tech').value, mkt:+$('f_mkt').value,
+    aud:+$('f_aud').value||0, goal:+$('f_goal').value||10000, timeline:clamp(+$('f_timeline').value||12,1,60),
+  };
+}
+
+/* ---------- scoring engine ---------- */
+function compute(inp,mod){
+  const a=ARCH[inp.industry];
+  const ct=mod.ct||inp.cust;
+  const cap=inp.capital*mod.capMult+inp.monthly*3;
+  const capRatio=clamp(cap/a.capNeed,0,2);
+  const audB=clamp(Math.log10(Math.max(inp.aud,1))*6,0,28);
+  const ctAdj={b2c:{price:0,speed:0,def:0,cac:14},b2b:{price:9,speed:-4,def:3,cac:2},ent:{price:18,speed:-20,def:8,cac:8}}[ct];
+  const hoursF=clamp(inp.hours/40,0,1);
+
+  const opportunity=clamp(a.scal*.32+(100-a.comp)*.28+audB*.7+inp.exp*1.6+Math.min(capRatio,1)*14+(mod.newMkt?5:0)+inp.mkt*.8,5,98);
+  const scalability=clamp(a.scal+(mod.hire?6:0)+(mod.out?5:0)+(mod.newMkt?4:0)+inp.tech*.7-(inp.industry==='consulting'&&!mod.hire?6:0)-(1-hoursF)*8,5,98);
+  const founderFit=clamp((a.w.tech*inp.tech+a.w.sales*inp.sales+a.w.mkt*inp.mkt)*7.2+inp.exp*2.2+hoursF*14,5,98);
+  const profit=clamp(a.margin+mod.price*.38-(a.comp-70)*.32+(mod.out?3:-0)-(mod.hire?5:0)+ctAdj.price*.4,5,98);
+  const speed=clamp(a.speed+audB*.8+inp.sales*1.4+(mod.price<0?7:0)-(mod.price>20?6:0)+ctAdj.speed+Math.min(capRatio,1)*10+(mod.out?4:0),5,98);
+  const defensibility=clamp(a.def+inp.tech*1.1+audB*.5+(mod.newMkt?3:0)+ctAdj.def+inp.exp*.8,5,98);
+
+  const composite=Math.round(opportunity*.22+founderFit*.20+profit*.18+scalability*.14+speed*.14+defensibility*.12);
+
+  // radar (higher = more hostile, except pricing power inverted in render)
+  const radar={
+    'COMPETITION INTENSITY':clamp(a.comp+(mod.newMkt?-8:0)-inp.exp*.6,5,98),
+    'BARRIER TO ENTRY':clamp(18+Math.log10(Math.max(a.capNeed,100))*13+(ct==='ent'?10:0)-Math.min(capRatio,1)*16-inp.exp*1.2,5,98),
+    'MARKET SATURATION':clamp(a.comp*.92+(mod.newMkt?-12:0),5,98),
+    'CAC DIFFICULTY':clamp(a.comp*.55+ctAdj.cac-inp.mkt*1.6-audB*.7+24+(mod.price>20?6:0),5,98),
+    'PRICING POWER':clamp(a.margin*.45+mod.price*.3+ctAdj.price+defensibility*.22,5,98),
+  };
+
+  // success probabilities
+  const sig=x=>1/(1+Math.exp(-x));
+  const fund=.66+.34*Math.min(capRatio,1), time=.7+.3*hoursF;
+  const p10=clamp(sig((composite-44)/11)*100*fund*time,2,94);
+  const p50=clamp(p10*(0.28+scalability/220),1,80);
+  const p100=clamp(p50*(0.4+scalability/260),0.5,66);
+
+  return {a,ct,cap,capRatio,audB,opportunity,scalability,founderFit,profit,speed,defensibility,composite,radar,p10,p50,p100};
+}
+
+/* ---------- verdict logic ---------- */
+function verdictOf(s,inp){
+  let c=s.composite;
+  if(s.capRatio<0.35)c=Math.min(c,52);
+  if(s.founderFit<30)c=Math.min(c,50);
+  if(c>=78)return{t:'STRONG BUY',col:'var(--green)',desc:'The committee sees an unusually strong alignment of market, economics and founder. Move with conviction — speed is now your biggest edge.'};
+  if(c>=66)return{t:'BUY',col:'var(--cyan)',desc:'A credible opportunity with manageable risk. The committee recommends proceeding, with disciplined milestones and early customer validation.'};
+  if(c>=53)return{t:'PROCEED WITH CAUTION',col:'var(--amber)',desc:'Viable but fragile. Several risk vectors must be de-risked before committing serious capital. Run cheap experiments first.'};
+  if(c>=40)return{t:'HIGH RISK',col:'#ff7847',desc:'The current configuration is working against you. Material changes to funding, skills coverage or model are required before launch.'};
+  return{t:'AVOID',col:'var(--red)',desc:'In its present form the committee cannot endorse this venture. Consider the ranked alternatives, or fundamentally restructure the approach.'};
+}
+function voteOf(v,analystBias){ // per-analyst vote with slight bias
+  const order=['AVOID','HIGH RISK','PROCEED WITH CAUTION','BUY','STRONG BUY'];
+  let i=order.indexOf(v.t);i=clamp(i+analystBias,0,4);return order[i];
+}
+
+/* ---------- gauges ---------- */
+const GAUGE_DEFS=[
+  ['opportunity','OPPORTUNITY SCORE','#00e5ff'],
+  ['scalability','SCALABILITY SCORE','#9d4dff'],
+  ['founderFit','FOUNDER FIT SCORE','#1f8fff'],
+  ['profit','PROFIT POTENTIAL','#27f0a5'],
+  ['speed','SPEED TO REVENUE','#ffb547'],
+  ['defensibility','DEFENSIBILITY','#ff6ad5'],
+];
+function buildGauges(){
+  $('gauges').innerHTML=GAUGE_DEFS.map(([k,l,c])=>`
+    <div class="gauge">
+      <svg width="110" height="110" viewBox="0 0 110 110">
+        <circle class="gring-bg" cx="55" cy="55" r="46"></circle>
+        <circle class="gring" id="g_${k}" cx="55" cy="55" r="46" stroke="${c}" stroke-dasharray="289" stroke-dashoffset="289"></circle>
+      </svg>
+      <div class="num" id="gn_${k}" style="color:${c}">0</div>
+      <div class="lbl">${l}</div>
+      <div class="delta" id="gd_${k}"></div>
+    </div>`).join('');
+}
+let prevScores=null;
+function animNum(el,to,suffix=''){
+  const from=+el.dataset.v||0;el.dataset.v=to;const t0=performance.now();
+  (function f(t){const p=Math.min((t-t0)/900,1),e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+(to-from)*e)+suffix;
+    if(p<1)requestAnimationFrame(f)})(t0);
+}
+function renderGauges(s){
+  GAUGE_DEFS.forEach(([k])=>{
+    const v=Math.round(s[k]);
+    $('g_'+k).style.strokeDashoffset=289-289*v/100;
+    animNum($('gn_'+k),v);
+    const d=$('gd_'+k);
+    if(prevScores){const diff=v-Math.round(prevScores[k]);
+      d.textContent=diff===0?'—':(diff>0?'▲ +':'▼ ')+diff;
+      d.style.color=diff>0?'var(--green)':diff<0?'var(--red)':'var(--faint)';
+    } else d.textContent='';
+  });
+}
+
+/* ---------- committee ---------- */
+const ANALYSTS=[
+  {id:'market', name:'VEGA',   role:'MARKET ANALYST',     col:'#00e5ff', bias:0},
+  {id:'financial',name:'ATLAS',role:'FINANCIAL ANALYST',  col:'#27f0a5', bias:0},
+  {id:'operations',name:'FORGE',role:'OPERATIONS ANALYST',col:'#1f8fff', bias:0},
+  {id:'growth', name:'NOVA',   role:'GROWTH ANALYST',     col:'#9d4dff', bias:1},
+  {id:'risk',   name:'CIPHER', role:'RISK ANALYST',       col:'#ff4d6d', bias:-1},
+];
+function buildCommittee(){
+  $('committee').innerHTML=ANALYSTS.map(a=>`
+    <div class="analyst" id="an_${a.id}">
+      <div class="ahead">
+        <div class="avatar" style="color:${a.col};border:1.5px solid ${a.col};box-shadow:0 0 14px ${a.col}55">${a.name[0]}</div>
+        <div><div class="name" style="color:${a.col}">${a.name}</div><div class="role">${a.role}</div></div>
+        <div class="conf"><b id="conf_${a.id}" style="color:${a.col}">--</b><span>CONFIDENCE</span></div>
+      </div>
+      <div class="txt" id="txt_${a.id}"></div>
+      <div class="vote" id="vote_${a.id}" style="color:${a.col}">DELIBERATING…</div>
+    </div>`).join('');
+}
+function analystConfidence(s){
+  return {market:s.opportunity,financial:s.profit,operations:s.founderFit,growth:s.scalability,risk:100-((s.radar['COMPETITION INTENSITY']+s.radar['CAC DIFFICULTY'])/2)};
+}
+function fallbackInsights(s,inp){
+  const a=s.a;
+  return {
+    market:`Demand signal for "${inp.idea.slice(0,60)}" in ${inp.country} reads ${s.opportunity>=65?'strong':s.opportunity>=45?'moderate':'weak'}. The ${a.label.toLowerCase()} archetype carries competition intensity of ${Math.round(s.radar['COMPETITION INTENSITY'])}/100 — ${s.radar['COMPETITION INTENSITY']>75?'a crowded arena where positioning is everything':'enough whitespace to carve a defensible niche'}. ${inp.aud>500?`Your existing audience of ${inp.aud.toLocaleString()} is a genuine unfair advantage for early distribution.`:'With no existing audience, expect a cold-start period of manual, unscalable customer acquisition.'}`,
+    financial:`Capital coverage is ${Math.round(s.capRatio*100)}% of the typical ${fmtGBP(a.capNeed)} requirement for this archetype. ${s.capRatio<0.5?'You are materially underfunded — plan a leaner MVP or stage the build.':s.capRatio>1.2?'You have funding headroom; resist the urge to overspend before product-market signals appear.':'Funding is adequate if spend stays disciplined.'} Gross margin profile (~${a.margin}%) ${a.margin>=70?'supports reinvestment-led growth':'leaves thin room for error — pricing power will decide survival'}. Reaching ${fmtGBP(inp.goal)}/mo within ${inp.timeline} months requires ${fmtGBP(inp.goal/Math.max(inp.timeline,1))} of new MRR per month on average.`,
+    operations:`Founder fit registers ${Math.round(s.founderFit)}/100. This archetype weights ${Object.entries(a.w).sort((x,y)=>y[1]-x[1])[0][0]==='tech'?'technical execution':Object.entries(a.w).sort((x,y)=>y[1]-x[1])[0][0]==='sales'?'sales motion':'marketing reach'} most heavily. At ${inp.hours} hrs/week ${inp.hours<15?'this is a constrained side-bet — scope ruthlessly':inp.hours<30?'you can sustain steady progress, but expect a 1.5–2x longer runway to milestones':'you have full-throttle capacity'}. ${MOD.out?'Outsourcing is active: faster shipping, watch quality control.':''} ${MOD.hire?'Hiring is simulated: capacity up, burn up, management overhead real.':''}`,
+    growth:`Scalability scores ${Math.round(s.scalability)}/100. ${a.scal>80?'The model compounds — marginal cost of serving customer N+1 trends toward zero.':a.scal>50?'Growth is achievable but partially linear; systemise delivery early.':'This is a capacity-bound model; revenue scales with hours or headcount unless you productise.'} Customer type ${s.ct.toUpperCase()} ${s.ct==='ent'?'means long cycles but heavyweight contract values':s.ct==='b2b'?'balances deal size with sane sales cycles':'demands volume economics and efficient paid/organic acquisition'}. Speed-to-revenue: ${Math.round(s.speed)}/100.`,
+    risk:`Primary threat vectors: ${s.capRatio<0.6?'underfunding, ':''}${s.radar['MARKET SATURATION']>75?'saturation, ':''}${s.radar['CAC DIFFICULTY']>60?'acquisition cost creep, ':''}execution velocity. Defensibility sits at ${Math.round(s.defensibility)}/100 — ${s.defensibility>65?'moats are buildable here (data, brand, switching costs)':'assume anything that works will be copied within months; speed and brand are your only shields'}. Probability-weighted downside is contained so long as monthly burn stays under ${fmtGBP(Math.max(inp.monthly,1)*1.0)} and validation precedes scale-spend.`,
+  };
+}
+function renderCommittee(s,inp,ins){
+  const conf=analystConfidence(s);const v=verdictOf(s,inp);
+  ANALYSTS.forEach((a,i)=>{
+    animNum($('conf_'+a.id),Math.round(clamp(conf[a.id],5,98)),'%');
+    const vote=voteOf(v,a.bias);
+    const ve=$('vote_'+a.id);ve.textContent='VOTE: '+vote;
+    typeText($('txt_'+a.id),ins[a.id],i*350);
+  });
+}
+const typeTimers={};
+function typeText(el,text,delay){
+  clearInterval(typeTimers[el.id]);el.textContent='';el.classList.add('typing');
+  setTimeout(()=>{let i=0;
+    typeTimers[el.id]=setInterval(()=>{
+      i+=3;el.textContent=text.slice(0,i);
+      if(i>=text.length){clearInterval(typeTimers[el.id]);el.classList.remove('typing')}
+    },12);
+  },delay);
+}
+
+/* ---------- radar ---------- */
+function renderRadar(s){
+  const labels=Object.keys(s.radar),vals=labels.map(k=>Math.round(s.radar[k]));
+  if(!radarChart){
+    radarChart=new Chart($('radarChart'),{type:'radar',
+      data:{labels,datasets:[{label:'THREAT PROFILE',data:vals,
+        backgroundColor:'rgba(0,229,255,.12)',borderColor:'#00e5ff',borderWidth:2,
+        pointBackgroundColor:'#9d4dff',pointBorderColor:'#00e5ff',pointRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,animation:{duration:900},
+        plugins:{legend:{display:false}},
+        scales:{r:{min:0,max:100,ticks:{display:false,stepSize:25},
+          grid:{color:'rgba(0,229,255,.12)'},angleLines:{color:'rgba(157,77,255,.18)'},
+          pointLabels:{color:'#6d7ca3',font:{family:'monospace',size:9}}}}}});
+  } else {radarChart.data.datasets[0].data=vals;radarChart.update();}
+  $('threatList').innerHTML=labels.map(k=>{
+    const v=Math.round(s.radar[k]);
+    const hostile=k!=='PRICING POWER'?v:100-v;
+    const col=hostile>70?'var(--red)':hostile>45?'var(--amber)':'var(--green)';
+    return `<div class="threat"><div class="tl">${k}</div>
+      <div class="tb"><i style="width:${v}%;background:linear-gradient(90deg,${col},${col});box-shadow:0 0 8px ${col}"></i></div>
+      <div class="tv" style="color:${col}">${v}</div></div>`;
+  }).join('');
+}
+
+/* ---------- probability ---------- */
+function renderProb(s,inp){
+  const rows=[
+    ['£10K / MONTH',s.p10,'#27f0a5'],
+    ['£50K / MONTH',s.p50,'#00e5ff'],
+    ['£100K / MONTH',s.p100,'#9d4dff'],
+  ];
+  $('probBody').innerHTML=rows.map(([l,p,c],i)=>`
+    <div class="prob-row">
+      <div class="pl"><span class="dim">PROBABILITY OF REACHING <span style="color:${c}">${l}</span> WITHIN ${Math.min(inp.timeline+ i*12,60)} MONTHS</span>
+      <b style="color:${c}" id="pn_${i}">0%</b></div>
+      <div class="ptrack"><div class="pfill" id="pf_${i}" style="background:linear-gradient(90deg,${c}66,${c});box-shadow:0 0 16px ${c}66"></div></div>
+    </div>`).join('')+
+    `<div class="sim-note">MODEL: composite signal ${s.composite}/100 · funding coverage ${Math.round(s.capRatio*100)}% · ${inp.hours} hrs/wk commitment. Probabilities shift live with the What-If Lab.</div>`;
+  rows.forEach(([l,p],i)=>{setTimeout(()=>{
+    $('pf_'+i).style.width=p+'%';animNum($('pn_'+i),Math.round(p),'%');},120*i)});
+}
+
+/* ---------- red team ---------- */
+function fallbackRedTeam(s,inp){
+  const out=[];
+  if(s.capRatio<0.6)out.push(['CAPITAL STARVATION',`With ${fmtGBP(s.cap)} effective capital against a typical ${fmtGBP(s.a.capNeed)} requirement, you will likely run dry before product-market fit. Underfunded ventures don't fail loudly — they fade.`]);
+  if(inp.hours<15)out.push(['TIME POVERTY',`${inp.hours} hours/week is below the credible threshold for this archetype. Competitors working full-time will iterate 3–4x faster than you.`]);
+  const wk=[['sales',inp.sales],['tech',inp.tech],['mkt',inp.mkt]].sort((a,b)=>a[1]-b[1])[0];
+  if(wk[1]<=4)out.push(['SKILL GAP: '+(wk[0]==='mkt'?'MARKETING':wk[0].toUpperCase()),`Your weakest capability (${wk[1]}/10) maps to a function this business cannot survive without. Plan to hire it, partner for it, or learn it fast — hoping is not a strategy.`]);
+  if(s.radar['MARKET SATURATION']>75)out.push(['RED OCEAN',`Saturation reads ${Math.round(s.radar['MARKET SATURATION'])}/100. Without a sharply differentiated wedge, you are funding your competitors' market education.`]);
+  if(inp.aud<200&&s.a.speed<40)out.push(['COLD START PROBLEM',`No audience + slow-revenue archetype = a long, expensive silence before first income. The hidden assumption is that people will find you. They won't.`]);
+  if(inp.exp<=3)out.push(['FIRST-TIMER TAX',`Inexperience means every mistake is novel. Budget 30–50% extra time and money for lessons that veterans have already paid for.`]);
+  out.push(['HIDDEN ASSUMPTION: DEMAND',`You are assuming people want this enough to pay. Until ${inp.cust==='ent'?'a signed pilot':'10 strangers'} hand over money, treat demand as unproven — everything else is decoration.`]);
+  out.push(['EXECUTION DRIFT',`Most ventures die of distraction, not competition. The probability model assumes consistent weekly execution for ${inp.timeline} months — history says that is the hardest variable.`]);
+  return out.slice(0,6);
+}
+function renderRedTeam(items){
+  $('redList').innerHTML=items.map(([t,d])=>`
+    <div class="redcard"><div class="ico">⚠</div><div class="rt"><b>${t}</b>${d}</div></div>`).join('');
+}
+
+/* ---------- alternatives ---------- */
+const ALT_LIB=[
+  {name:'AI Automation Agency',desc:'Implement AI workflows for local SMEs',cost:500, diff:55,scal:62,ttfs:'2–4 WKS',pot:76,req:{sales:.5,tech:.3,mkt:.2}},
+  {name:'Productized Service',desc:'One fixed-scope offer, subscription pricing',cost:300, diff:42,scal:58,ttfs:'1–3 WKS',pot:68,req:{sales:.45,tech:.2,mkt:.35}},
+  {name:'Micro-SaaS',desc:'Tiny niche tool, painfully specific problem',cost:3000,diff:74,scal:92,ttfs:'2–4 MOS',pot:88,req:{sales:.15,tech:.6,mkt:.25}},
+  {name:'Niche Newsletter / Media',desc:'Own an audience, monetise via sponsors',cost:200, diff:48,scal:80,ttfs:'1–2 MOS',pot:72,req:{sales:.15,tech:.1,mkt:.75}},
+  {name:'B2B Lead-Gen Service',desc:'Booked meetings for one vertical',cost:400, diff:50,scal:55,ttfs:'1–2 WKS',pot:64,req:{sales:.6,tech:.15,mkt:.25}},
+  {name:'Digital Products / Courses',desc:'Package expertise, sell while you sleep',cost:800, diff:52,scal:86,ttfs:'3–6 WKS',pot:74,req:{sales:.2,tech:.15,mkt:.65}},
+  {name:'High-Ticket Consulting',desc:'Few clients, deep transformation, premium fees',cost:200, diff:46,scal:36,ttfs:'1–3 WKS',pot:60,req:{sales:.6,tech:.2,mkt:.2}},
+  {name:'Marketplace Side-Door',desc:'Sell on existing platforms before building one',cost:1500,diff:58,scal:70,ttfs:'2–6 WKS',pot:70,req:{sales:.25,tech:.25,mkt:.5}},
+];
+function renderAlts(inp){
+  const fit=o=>(o.req.sales*inp.sales+o.req.tech*inp.tech+o.req.mkt*inp.mkt)*10;
+  const ranked=ALT_LIB.map(o=>({...o,score:o.pot*.55+fit(o)*.45}))
+    .sort((a,b)=>b.score-a.score).slice(0,5);
+  $('altList').innerHTML=ranked.map((o,i)=>{
+    const bar=(v,c)=>`<div class="minibar"><i style="width:${v}%;background:${c};box-shadow:0 0 6px ${c}"></i></div>`;
+    return `<div class="alt">
+      <div class="rank">0${i+1}</div>
+      <div class="aname">${o.name}<small>${o.desc}</small></div>
+      <div class="mv">${fmtGBP(o.cost)}</div>
+      <div class="mv hide-m">${o.diff}/100${bar(o.diff,'var(--amber)')}</div>
+      <div class="mv hide-m">${o.scal}/100${bar(o.scal,'var(--violet)')}</div>
+      <div class="mv">${o.ttfs}</div>
+      <div class="mv hide-m">${Math.round(o.score)}/100${bar(o.score,'var(--cyan)')}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- roadmap ---------- */
+function fallbackRoadmap(s,inp){
+  const a=s.a;
+  return {
+    'DAY 1':['Write the one-sentence value proposition and the price you intend to charge','Identify 20 specific people or companies who feel this problem this week','Open a dedicated workspace: domain, basic landing page, payment link'],
+    'WEEK 1':['Hold 5+ problem conversations — listen for budget, urgency, current workarounds',`Build the smallest sellable version (${a.label.includes('SaaS')||a.label.includes('App')?'clickable prototype or concierge MVP':'a pilot offer you can deliver manually'})`,'Make the first ask: pre-order, deposit, or signed letter of intent'],
+    'MONTH 1':['Land the first paying customer — at any price, by any (legal) means','Define one acquisition channel and go deep, ignore the rest','Set the kill-criteria: what evidence by day 60 means stop or pivot'],
+    'MONTH 3':[`Reach ${fmtGBP(Math.max(inp.goal*.1,500))}/mo — 10% of target validates the engine`,'Document delivery into repeatable playbooks; cut anything customers don\'t pay for','Review unit economics: CAC, gross margin, payback period'],
+    'MONTH 6':[`Scale the proven channel toward ${fmtGBP(Math.max(inp.goal*.4,2000))}/mo`,(MOD.hire||s.scalability>70?'Make the first hire or contractor against your weakest skill':'Automate or outsource the lowest-value 20% of your week'),'Build the moat: brand, data, community or switching costs'],
+    'YEAR 1':[`Target run-rate: ${fmtGBP(inp.goal)}/mo with margin intact`,'Systemise so the business survives a two-week founder absence','Decide the next play: compound, raise, or productise further'],
+  };
+}
+function renderRoadmap(map){
+  $('roadmap').innerHTML=Object.entries(map).map(([k,items])=>`
+    <div class="tstep"><h4>${k}</h4><ul>${items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('');
+}
+
+/* ---------- verdict ---------- */
+function renderVerdict(s,inp){
+  const v=verdictOf(s,inp);
+  $('compRing').style.strokeDashoffset=295.3-295.3*s.composite/100;
+  $('compRing').style.stroke=v.col;
+  animNum($('compNum'),s.composite);$('compNum').style.color=v.col;
+  const b=$('vBadge');b.textContent=v.t;b.style.color=v.col;
+  $('vText').textContent=(AI&&AI.verdictNote)?AI.verdictNote:v.desc;
+  return v;
+}
+$('btnVerdict').addEventListener('click',()=>{
+  if(!SCORES)return;
+  const v=verdictOf(SCORES,INP);
+  const st=$('stampEl');st.className='stamp';st.style.color=v.col;st.textContent=v.t;
+  $('stampSub').textContent=v.desc;
+  $('stampVotes').innerHTML=ANALYSTS.map(a=>{
+    const vote=voteOf(v,a.bias);
+    return `<div class="v-vote" style="color:${a.col}">${a.name} · ${a.role.split(' ')[0]} — ${vote}</div>`}).join('');
+  $('verdictOverlay').classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>st.classList.add('land')));
+});
+
+/* ---------- what-if lab ---------- */
+function bindWhatIf(){
+  $('w_cap').addEventListener('input',()=>{
+    MOD.capMult=+$('w_cap').value/100;
+    $('wv_cap').textContent=$('w_cap').value+'%';
+    $('wn_cap').textContent=fmtGBP((INP?INP.capital:5000)*MOD.capMult);
+    recompute();
+  });
+  $('w_price').addEventListener('input',()=>{
+    MOD.price=+$('w_price').value;
+    $('wv_price').textContent=(MOD.price>0?'+':'')+MOD.price+'%';
+    recompute();
+  });
+  $('w_hire').addEventListener('click',e=>{e.target.classList.toggle('on');MOD.hire=e.target.classList.contains('on');recompute()});
+  $('w_out').addEventListener('click',e=>{e.target.classList.toggle('on');MOD.out=e.target.classList.contains('on');recompute()});
+  $('w_newmkt').addEventListener('click',e=>{e.target.classList.toggle('on');MOD.newMkt=e.target.classList.contains('on');recompute()});
+  ['w_ctb2c','w_ctb2b','w_ctent'].forEach(id=>{
+    $(id).addEventListener('click',e=>{
+      ['w_ctb2c','w_ctb2b','w_ctent'].forEach(x=>$(x).classList.remove('on'));
+      e.target.classList.add('on');MOD.ct=e.target.dataset.ct;recompute();
+    });
+  });
+}
+function syncCtToggles(){
+  ['w_ctb2c','w_ctb2b','w_ctent'].forEach(x=>$(x).classList.remove('on'));
+  $({b2c:'w_ctb2c',b2b:'w_ctb2b',ent:'w_ctent'}[INP.cust]).classList.add('on');
+  MOD.ct=INP.cust;
+}
+function recompute(){
+  if(!INP)return;
+  prevScores=SCORES;
+  SCORES=compute(INP,MOD);
+  renderGauges(SCORES);renderRadar(SCORES);renderProb(SCORES,INP);renderVerdict(SCORES,INP);
+  const conf=analystConfidence(SCORES);const v=verdictOf(SCORES,INP);
+  ANALYSTS.forEach(a=>{animNum($('conf_'+a.id),Math.round(clamp(conf[a.id],5,98)),'%');
+    $('vote_'+a.id).textContent='VOTE: '+voteOf(v,a.bias)});
+  const d=SCORES.composite-(prevScores?prevScores.composite:SCORES.composite);
+  $('wifDelta').textContent=d===0?'':`COMPOSITE ${d>0?'▲ +':'▼ '}${d} → ${SCORES.composite}/100`;
+}
+
+/* ---------- askClaude enrichment ---------- */
+async function enrich(inp,s){
+  if(!(window.cowork&&window.cowork.askClaude))return;
+  const prompt=`You are a brutally honest venture analyst committee. Evaluate this business idea and reply with ONLY valid JSON, no markdown fences, matching exactly this schema:
+{"market":"...","financial":"...","operations":"...","growth":"...","risk":"...","redteam":[["TITLE","2-sentence brutal critique"],...6 items],"roadmap":{"DAY 1":["...","...","..."],"WEEK 1":[...],"MONTH 1":[...],"MONTH 3":[...],"MONTH 6":[...],"YEAR 1":[...]},"verdictNote":"2-3 sentence committee verdict rationale"}
+Each analyst field is 2-4 sharp sentences, specific to the idea, citing the numbers given. Use British English and £.`;
+  try{
+    const data=[JSON.stringify({inputs:inp,computedScores:{opportunity:s.opportunity,scalability:s.scalability,founderFit:s.founderFit,profit:s.profit,speedToRevenue:s.speed,defensibility:s.defensibility,composite:s.composite,radar:s.radar,probabilities:{p10k:s.p10,p50k:s.p50,p100k:s.p100},capitalCoveragePct:Math.round(s.capRatio*100)}})];
+    const res=await Promise.race([window.cowork.askClaude(prompt,data),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),45000))]);
+    let txt=typeof res==='string'?res:(res&&res.text)||JSON.stringify(res);
+    const m=txt.match(/\{[\s\S]*\}/);if(!m)throw new Error('no json');
+    AI=JSON.parse(m[0]);
+    // apply
+    const ins={};['market','financial','operations','growth','risk'].forEach(k=>ins[k]=AI[k]||fallbackInsights(s,inp)[k]);
+    renderCommittee(s,inp,ins);
+    if(Array.isArray(AI.redteam)&&AI.redteam.length)renderRedTeam(AI.redteam.map(r=>Array.isArray(r)?r:[r.title||'RISK',r.detail||String(r)]));
+    if(AI.roadmap)renderRoadmap(AI.roadmap);
+    if(AI.verdictNote)$('vText').textContent=AI.verdictNote;
+    $('commBadge').textContent='LIVE INTEL';$('commBadge').className='intel-badge live';
+    $('redBadge').textContent='LIVE INTEL';$('roadBadge').textContent='LIVE INTEL';
+  }catch(e){/* heuristic core remains */}
+}
+
+/* ---------- main run ---------- */
+const CINE_LINES=['ACCESSING GLOBAL MARKET FEEDS…','CROSS-REFERENCING 14,202 COMPARABLE VENTURES…','RUNNING FINANCIAL STRESS MODELS…','SCANNING COMPETITIVE TERRAIN…','PROFILING FOUNDER CAPABILITIES…','SIMULATING 10,000 OUTCOME PATHS…','CONVENING INVESTMENT COMMITTEE…'];
+$('btnRun').addEventListener('click',async()=>{
+  saveInputs();
+  INP=gather();
+  MOD={capMult:+$('w_cap').value/100,price:+$('w_price').value,hire:$('w_hire').classList.contains('on'),out:$('w_out').classList.contains('on'),newMkt:$('w_newmkt').classList.contains('on'),ct:null};
+  $('wn_cap').textContent=fmtGBP(INP.capital*MOD.capMult);
+  // cinematic
+  const cine=$('cine');cine.classList.add('show');
+  let pct=0;const t=setInterval(()=>{pct=Math.min(pct+Math.random()*4+1.5,99);$('cinepct').textContent=Math.floor(pct)+'%'},90);
+  CINE_LINES.forEach((l,i)=>setTimeout(()=>$('cinelog').textContent=l,i*620));
+  await new Promise(r=>setTimeout(r,CINE_LINES.length*620+500));
+  clearInterval(t);$('cinepct').textContent='100%';
+  await new Promise(r=>setTimeout(r,350));
+  cine.classList.remove('show');
+
+  prevScores=null;AI=null;
+  SCORES=compute(INP,MOD);
+  $('results').style.display='block';
+  syncCtToggles();
+
+  // sequential reveal
+  const seq=['scanSec','commSec','radarSec','wifSec','probSec','redSec','altSec','roadSec','verdSec'];
+  seq.forEach((id,i)=>setTimeout(()=>$(id).classList.add('reveal'),i*260));
+
+  renderGauges(SCORES);
+  renderCommittee(SCORES,INP,fallbackInsights(SCORES,INP));
+  setTimeout(()=>renderRadar(SCORES),600);
+  renderProb(SCORES,INP);
+  renderRedTeam(fallbackRedTeam(SCORES,INP));
+  renderAlts(INP);
+  renderRoadmap(fallbackRoadmap(SCORES,INP));
+  renderVerdict(SCORES,INP);
+
+  $('tickerTxt').textContent=`ANALYSING: ${INP.idea.toUpperCase().slice(0,90)} · ARCHETYPE: ${SCORES.a.label.toUpperCase()} · MARKET: ${INP.country.toUpperCase()} · CAPITAL: ${fmtGBP(INP.capital)} · COMPOSITE SIGNAL: ${SCORES.composite}/100 · ALL ENGINES NOMINAL · `;
+
+  document.getElementById('scanSec').scrollIntoView({behavior:'smooth',block:'start'});
+  enrich(INP,SCORES); // background AI committee upgrade
+});
+
+/* ---------- init ---------- */
+buildGauges();buildCommittee();bindWhatIf();
+</script>
+</body>
+</html>
